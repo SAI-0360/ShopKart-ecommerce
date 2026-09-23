@@ -1,11 +1,12 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
     const { user, setUser } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     
     const handleLogout = async () => {
         try {
@@ -36,16 +37,37 @@ const Navbar = () => {
                     </Link>
 
                     {/* Simple Nav Links */}
-                    <nav className="hidden sm:flex items-center gap-6 text-sm font-medium text-slate-600">
-                        <Link to="/home" className="text-violet-600 font-semibold cursor-pointer">
+                    <nav className="hidden sm:flex items-center gap-6 text-sm font-medium">
+                        <Link
+                            to="/home"
+                            className={`cursor-pointer transition-colors ${
+                                location.pathname === '/home'
+                                    ? 'text-violet-600 font-semibold'
+                                    : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                        >
                             Home
                         </Link>
-                        <span className="hover:text-slate-900 cursor-pointer transition-colors">
+                        <Link
+                            to="/products"
+                            className={`cursor-pointer transition-colors ${
+                                location.pathname.startsWith('/products')
+                                    ? 'text-violet-600 font-semibold'
+                                    : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                        >
                             Products
-                        </span>
-                        <span className="hover:text-slate-900 cursor-pointer transition-colors">
+                        </Link>
+                        <Link
+                            to="/orders"
+                            className={`cursor-pointer transition-colors ${
+                                location.pathname.startsWith('/orders')
+                                    ? 'text-violet-600 font-semibold'
+                                    : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                        >
                             Orders
-                        </span>
+                        </Link>
                     </nav>
 
                     {/* Right Side: User Info & Logout Button */}

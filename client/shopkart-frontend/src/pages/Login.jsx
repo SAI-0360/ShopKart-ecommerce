@@ -81,6 +81,9 @@ const Login = () => {
 							name="email"
 							type="email"
 							placeholder="Email Address"
+							readOnly
+							onFocus={(e) => e.target.readOnly = false}
+							autoComplete="username"
 							className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200/90 bg-slate-50/50 text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all duration-200 text-xs sm:text-sm font-normal"
 							value={form.email}
 							onChange={handleChange}
@@ -99,6 +102,9 @@ const Login = () => {
 							name="password"
 							type="password"
 							placeholder="Password"
+							readOnly
+							onFocus={(e) => e.target.readOnly = false}
+							autoComplete="current-password"
 							className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200/90 bg-slate-50/50 text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all duration-200 text-xs sm:text-sm font-normal"
 							value={form.password}
 							onChange={handleChange}

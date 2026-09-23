@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import userRoutes from './routes/customer.route.js';
+import productRoutes from './routes/product.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
@@ -30,6 +31,7 @@ app.use(cookieParser());
 
 
 app.use('/customers', userRoutes);
+app.use('/products', productRoutes);
 
 app.get('/', (req, res) => {
     res.send('Welcome to ShopKart!')
