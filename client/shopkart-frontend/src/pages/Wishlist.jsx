@@ -51,6 +51,10 @@ const Wishlist = () => {
 
             // Instantly remove from local state without extra api refetch
             setWishlist((prev) => prev.filter((item) => item._id !== productId));
+
+            // Dispatch global event to update Navbar count in real time
+            window.dispatchEvent(new Event('wishlistUpdated'));
+            
         } catch (err) {
             alert(err.response?.data?.message || 'Failed to remove product.');
         }

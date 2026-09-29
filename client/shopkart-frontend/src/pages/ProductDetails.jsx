@@ -60,6 +60,9 @@ const ProductDetails = () => {
                 await api.post(`/wishlist/${_id}`);
                 setIsWishlisted(true);
             }
+
+            // Dispatch global event to update Navbar count in real time
+            window.dispatchEvent(new Event('wishlistUpdated'));
         } catch (err) {
             if (err.response?.status === 401) {
                 alert('Please log in to manage your wishlist.');

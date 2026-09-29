@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -7,15 +7,38 @@ const Navbar = () => {
     const { user, setUser } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    
+    const [wishlistCount, setWishlistCount] = useState(0);
+
+    useEffect(() => {
+        if (!user) {
+            setWishlistCount(0);
+            return;
+        }
+
+        const update = async () => {
+            try {
+                const res = await api.get('/wishlist');
+                setWishlistCount(res.data.count || 0);
+            } catch {
+                setWishlistCount(0);
+            }
+        };
+
+        update();
+        window.addEventListener('wishlistUpdated', update);
+        return () => window.removeEventListener('wishlistUpdated', update);
+    }, [user]);
+
+
     const handleLogout = async () => {
         try {
             await api.post('/customers/logout'); // Clears cookie on backend
             setUser(null); // Clear context state
-            navigate('/login');  
+            setWishlistCount(0);
+            navigate('/login');
         } catch (error) {
             console.log('Error logging out:', error);
-        } 
+        }
     };
 
 
@@ -40,38 +63,51 @@ const Navbar = () => {
                     <nav className="hidden sm:flex items-center gap-6 text-sm font-medium">
                         <Link
                             to="/home"
-                            className={`cursor-pointer transition-colors ${
-                                location.pathname === '/home'
+                            className={`cursor-pointer transition-colors ${location.pathname === '/home'
                                     ? 'text-violet-600 font-semibold'
                                     : 'text-slate-600 hover:text-slate-900'
-                            }`}
+                                }`}
                         >
                             Home
                         </Link>
                         <Link
                             to="/products"
-                            className={`cursor-pointer transition-colors ${
-                                location.pathname.startsWith('/products')
+                            className={`cursor-pointer transition-colors ${location.pathname.startsWith('/products')
                                     ? 'text-violet-600 font-semibold'
                                     : 'text-slate-600 hover:text-slate-900'
-                            }`}
+                                }`}
                         >
                             Products
                         </Link>
                         <Link
                             to="/wishlist"
-                            className={`cursor-pointer transition-colors ${
-                                location.pathname.startsWith('/wishlist')
+                            className={`cursor-pointer transition-colors inline-flex items-center gap-1.5 ${location.pathname.startsWith('/wishlist')
                                     ? 'text-violet-600 font-semibold'
                                     : 'text-slate-600 hover:text-slate-900'
-                            }`}
+                                }`}
                         >
-                            Wishlist
+                            <span>Wishlist {user ? `(${wishlistCount})` : ''}</span>
                         </Link>
                     </nav>
 
                     {/* Right Side: User Info & Logout Button */}
                     <div className="flex items-center gap-3">
+                        {/* Mobile Wishlist Link with Badge */}
+                        <Link
+                            to="/wishlist"
+                            className="sm:hidden relative p-2 text-slate-600 hover:text-rose-600 rounded-xl hover:bg-rose-50 transition-colors"
+                            title={user ? `Wishlist (${wishlistCount})` : "Wishlist"}
+                            aria-label="Wishlist"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                            </svg>
+                            {wishlistCount > 0 ? (
+                                <span className="absolute top-0.5 right-0.5 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                                    {wishlistCount}
+                                </span>
+                            ) : null}
+                        </Link>
                         {/* User Badge */}
                         <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/80">
                             <div className="w-7 h-7 rounded-full bg-violet-100 text-violet-700 font-bold text-xs flex items-center justify-center">
