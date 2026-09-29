@@ -7,6 +7,10 @@ const Products = () => {
     const [products, setProducts] = useState([]);
     const [search, setSearch] = useState('');
     const [category, setCategory] = useState('All');
+
+    const [wishListIds, setWishListIds] = useState([]); // needed for wishlist highlight in prouct cards.
+    // when not used in the product card, the heart icon will always be in the default state (not highlighted) even if the product is in the wishlist.
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -14,7 +18,7 @@ const Products = () => {
         try {
             setLoading(true);
             setError(null);
-            
+
             const params = {};
             if (search.trim()) {
                 params.search = search.trim();
@@ -24,14 +28,18 @@ const Products = () => {
                 params.category = category;
             }
 
-            const productsData = await api.get('/products', { params }); 
+            const productsData = await api.get('/products', { params });
+            const wishListData = await api.get('/wishlist'); // Fetch wishlist data
 
             setProducts(productsData.data.products);
-            setLoading(false);
+            setWishListIds(wishListData.data.wishlist.map(item => item._id)); // Store wishlist product IDs
+
         }
         catch (error) {
             console.error('Error fetching products:', error);
             setError(error.message || 'Something went wrong while fetching products.');
+        }
+        finally {
             setLoading(false);
         }
     };
@@ -53,10 +61,10 @@ const Products = () => {
 
             {/* Main Content Area */}
             <main className="relative z-10 flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8">
-                
+
                 {/* Header & Controls Bar */}
                 <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-sm mb-8">
-                    
+
                     {/* Title & Product Count */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-5 pb-4 border-b border-slate-100">
                         <div>
@@ -74,7 +82,7 @@ const Products = () => {
 
                     {/* Search & Category Filter Row */}
                     <div className="flex flex-col sm:flex-row items-center gap-3">
-                        
+
                         {/* Search Input */}
                         <div className="relative flex-1 w-full">
                             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -164,7 +172,11 @@ const Products = () => {
                 {!loading && !error && products.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                         {products.map((item) => (
-                            <ProductCard key={item._id} product={item} />
+                            <ProductCard 
+                                key={item._id}
+                                product={item}
+                                wasWishlisted={wishListIds.includes(item._id)}  // Pass wishlist status to ProductCard
+                            />
                         ))}
                     </div>
                 )}

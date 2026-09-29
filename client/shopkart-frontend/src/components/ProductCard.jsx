@@ -2,30 +2,36 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, wasWishlisted }) => {
     const { _id, name, description, price, category, image, stock } = product;
     const isOutOfStock = stock <= 0;
 
     const navigate = useNavigate();
-    const [isWishlisted, setIsWishlisted] = useState(false);
+    const [isWishlisted, setIsWishlisted] = useState(wasWishlisted);
     const [isAdding, setIsAdding] = useState(false);
 
-    const handleAddToWishlist = async (e) => {
+    const handleToggleWishlist = async (e) => {
         e.preventDefault();
-        if (isAdding) return;
+        if (isAdding) return; // Prevent double-clicks
+
         try {
             setIsAdding(true);
-            await api.post(`/wishlist/${_id}`);
-            setIsWishlisted(true);
-        } catch (err) {
-            if (err.response?.status === 409) {// code 409 indicates the product is already in the wishlist
+
+            if (isWishlisted) {
+                // Currently Wishlisted -> Send DELETE to Remove
+                await api.delete(`/wishlist/${_id}`);
+                setIsWishlisted(false);
+            } else {
+                // Not Wishlisted -> Send POST to Add
+                await api.post(`/wishlist/${_id}`);
                 setIsWishlisted(true);
-            } else if (err.response?.status === 401) {// code 401 indicates the user is not authenticated
-                alert('Please log in to add products to your wishlist.');
+            }
+        } catch (err) {
+            if (err.response?.status === 401) {
+                alert('Please log in to manage your wishlist.');
                 navigate('/login');
             } else {
-                console.error('Failed to add to wishlist:', err);
-                alert(err.response?.data?.message || 'Unable to save product. Please try again.');
+                console.error('Wishlist action failed:', err);
             }
         } finally {
             setIsAdding(false);
@@ -34,8 +40,8 @@ const ProductCard = ({ product }) => {
 
     return (
         <div className={`bg-white rounded-2xl border shadow-sm overflow-hidden flex flex-col transition-all duration-300 group ${isOutOfStock
-                ? 'border-slate-200/70 bg-slate-50/30'
-                : 'border-slate-200/80 hover:border-slate-300 hover:shadow-[0_12px_30px_-10px_rgba(99,102,241,0.12)]'
+            ? 'border-slate-200/70 bg-slate-50/30'
+            : 'border-slate-200/80 hover:border-slate-300 hover:shadow-[0_12px_30px_-10px_rgba(99,102,241,0.12)]'
             }`}>
 
             {/* Product Image & Badges */}
@@ -44,8 +50,8 @@ const ProductCard = ({ product }) => {
                     src={image}
                     alt={name}
                     className={`w-full h-full object-cover object-center transition-transform duration-300 ${isOutOfStock
-                            ? 'grayscale opacity-60'
-                            : 'group-hover:scale-105'
+                        ? 'grayscale opacity-60'
+                        : 'group-hover:scale-105'
                         }`}
                 />
 
@@ -60,8 +66,8 @@ const ProductCard = ({ product }) => {
 
                 {/* Top-Left Stock Badge */}
                 <span className={`absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-md text-[10px] font-semibold shadow-sm border ${!isOutOfStock
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200/70'
-                        : 'bg-rose-50 text-rose-700 border-rose-200/70'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200/70'
+                    : 'bg-rose-50 text-rose-700 border-rose-200/70'
                     }`}>
                     {!isOutOfStock ? `${stock} in stock` : 'Sold Out'}
                 </span>
@@ -69,15 +75,14 @@ const ProductCard = ({ product }) => {
                 {/* Top-Right Wishlist Button */}
                 <button
                     type="button"
-                    onClick={handleAddToWishlist}
+                    onClick={handleToggleWishlist}
                     disabled={isAdding}
                     title={isAdding ? "Saving..." : isWishlisted ? "Added to Wishlist" : "Add to Wishlist"}
                     aria-label={isAdding ? "Saving..." : isWishlisted ? "Added to Wishlist" : "Add to Wishlist"}
-                    className={`absolute top-2.5 right-2.5 w-8 h-8 rounded-full backdrop-blur-sm border shadow-sm flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90 z-10 ${
-                        isWishlisted
+                    className={`absolute top-2.5 right-2.5 w-8 h-8 rounded-full backdrop-blur-sm border shadow-sm flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90 z-10 ${isWishlisted
                             ? 'bg-rose-50 border-rose-200 text-rose-500 hover:bg-rose-100'
                             : 'bg-white/90 border-slate-200/80 text-slate-400 hover:text-rose-500 hover:bg-white hover:border-rose-200 hover:scale-110'
-                    }`}
+                        }`}
                 >
                     {isAdding ? (
                         <svg className="w-3.5 h-3.5 animate-spin text-rose-500" fill="none" viewBox="0 0 24 24">
@@ -86,9 +91,8 @@ const ProductCard = ({ product }) => {
                         </svg>
                     ) : (
                         <svg
-                            className={`w-4 h-4 transition-transform duration-200 ${
-                                isWishlisted ? 'fill-rose-500 stroke-rose-500 scale-110' : 'fill-none stroke-current'
-                            }`}
+                            className={`w-4 h-4 transition-transform duration-200 ${isWishlisted ? 'fill-rose-500 stroke-rose-500 scale-110' : 'fill-none stroke-current'
+                                }`}
                             viewBox="0 0 24 24"
                             strokeWidth={1.8}
                         >
@@ -134,8 +138,8 @@ const ProductCard = ({ product }) => {
                     <Link
                         to={`/products/${_id}`}
                         className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all shadow-sm flex items-center gap-1 active:scale-95 ${isOutOfStock
-                                ? 'bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200'
-                                : 'bg-violet-600 hover:bg-violet-700 text-white shadow-violet-500/20 hover:shadow-violet-500/30'
+                            ? 'bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200'
+                            : 'bg-violet-600 hover:bg-violet-700 text-white shadow-violet-500/20 hover:shadow-violet-500/30'
                             }`}
                     >
                         <span>Details</span>
