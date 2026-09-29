@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { api } from '../services/api';
 
 const ProductDetails = () => {
-
     const { id } = useParams();
+    const navigate = useNavigate();
 
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isWishlisted, setIsWishlisted] = useState(false);
+    const [isAdding, setIsAdding] = useState(false);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -29,6 +31,30 @@ const ProductDetails = () => {
 
         fetchProduct();
     }, [id]);
+
+    const _id = product?._id || id;
+
+    const handleAddToWishlist = async (e) => {
+        e.preventDefault();
+        if (isAdding) return;
+        try {
+            setIsAdding(true);
+            await api.post(`/wishlist/${_id}`);
+            setIsWishlisted(true);
+        } catch (err) {
+            if (err.response?.status === 409) {// code 409 indicates the product is already in the wishlist
+                setIsWishlisted(true);
+            } else if (err.response?.status === 401) {// code 401 indicates the user is not authenticated
+                alert('Please log in to add products to your wishlist.');
+                navigate('/login');
+            } else {
+                console.error('Failed to add to wishlist:', err);
+                alert(err.response?.data?.message || 'Unable to save product. Please try again.');
+            }
+        } finally {
+            setIsAdding(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-violet-500 selection:text-white relative overflow-hidden">
@@ -96,7 +122,43 @@ const ProductDetails = () => {
                                     alt={product.name}
                                     className="w-full h-full object-cover object-center"
                                 />
-                                {/* Stock Status Pill on top of Image */}
+
+                                {/* Top-Left Floating Wishlist Heart Button */}
+                                <button
+                                    type="button"
+                                    onClick={handleAddToWishlist}
+                                    disabled={isAdding}
+                                    title={isWishlisted ? "In Wishlist" : "Add to Wishlist"}
+                                    aria-label={isWishlisted ? "In Wishlist" : "Add to Wishlist"}
+                                    className={`absolute top-4 left-4 w-10 h-10 rounded-full backdrop-blur-sm border shadow-sm flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90 z-10 ${
+                                        isWishlisted
+                                            ? 'bg-rose-50 border-rose-200 text-rose-500 hover:bg-rose-100'
+                                            : 'bg-white/90 border-slate-200/80 text-slate-400 hover:text-rose-500 hover:bg-white hover:border-rose-200 hover:scale-110'
+                                    }`}
+                                >
+                                    {isAdding ? (
+                                        <svg className="w-4 h-4 animate-spin text-rose-500" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    ) : (
+                                        <svg
+                                            className={`w-5 h-5 transition-transform duration-200 ${
+                                                isWishlisted ? 'fill-rose-500 stroke-rose-500 scale-110' : 'fill-none stroke-current'
+                                            }`}
+                                            viewBox="0 0 24 24"
+                                            strokeWidth={1.8}
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+                                            />
+                                        </svg>
+                                    )}
+                                </button>
+
+                                {/* Top-Right Stock Status Pill on Image */}
                                 <span className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold shadow-sm border ${product.stock > 0
                                     ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                     : 'bg-rose-50 text-rose-700 border-rose-200'
@@ -152,6 +214,40 @@ const ProductDetails = () => {
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                                         </svg>
                                         <span>Add to Cart</span>
+                                    </button>
+
+                                    {/* Wishlist Button */}
+                                    <button
+                                        type="button"
+                                        onClick={handleAddToWishlist}
+                                        disabled={isAdding}
+                                        className={`sm:w-auto px-5 py-3.5 rounded-xl border text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer active:scale-95 shadow-xs ${
+                                            isWishlisted
+                                                ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100'
+                                                : 'bg-white border-slate-200 text-slate-700 hover:border-rose-200 hover:text-rose-600 hover:bg-rose-50/50'
+                                        }`}
+                                    >
+                                        {isAdding ? (
+                                            <svg className="w-5 h-5 animate-spin text-rose-500" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        ) : (
+                                            <svg
+                                                className={`w-5 h-5 transition-transform duration-200 ${
+                                                    isWishlisted ? 'fill-rose-500 stroke-rose-500 scale-110' : 'fill-none stroke-current'
+                                                }`}
+                                                viewBox="0 0 24 24"
+                                                strokeWidth={1.75}
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+                                                />
+                                            </svg>
+                                        )}
+                                        <span>{isAdding ? 'Saving...' : isWishlisted ? 'Added to Wishlist' : 'Add to Wishlist'}</span>
                                     </button>
                                 </div>
 

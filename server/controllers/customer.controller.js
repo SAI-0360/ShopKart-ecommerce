@@ -7,6 +7,12 @@ const cookieOptions = {
     httpOnly: true
 }
 
+const sanitizeUser = (user) => {
+    const safeUser = user.toObject ? user.toObject() : { ...user };
+    delete safeUser.password;
+    return safeUser;
+}
+
 export const registerUser = async (req, res) => {
 
     try {
@@ -51,12 +57,7 @@ export const registerUser = async (req, res) => {
         res.status(201).json({
             success: true,
             message: 'User successfully registered!',
-            customer: {
-                _id: newUser._id,
-                fullName: newUser.fullName,
-                email: newUser.email,
-                phone: newUser.phone
-            }
+            customer: sanitizeUser(newUser)
         })
 
     } catch (error) {
@@ -95,13 +96,7 @@ export const loginUser = async (req, res) => {
         res.status(200).json({
             success: true,
             message: 'Login successful!',
-            // to be used to display user info on the frontend
-            customer: {
-                _id: foundUser._id,
-                fullName: foundUser.fullName,
-                email: foundUser.email,
-                phone: foundUser.phone
-            }
+            customer: sanitizeUser(foundUser)
         });
 
     } catch (error) {
@@ -110,8 +105,8 @@ export const loginUser = async (req, res) => {
 }
 
 export const getMe = (req, res) => {
-    const authenticatedUser = req.user
-    res.status(200).json({ authenticatedUser })
+    const authenticatedUser = sanitizeUser(req.user)
+    return res.status(200).json({ authenticatedUser })
 }
 
 export const logoutUser = (req, res) => {

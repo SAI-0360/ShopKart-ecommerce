@@ -59,14 +59,14 @@ const Navbar = () => {
                             Products
                         </Link>
                         <Link
-                            to="/orders"
+                            to="/wishlist"
                             className={`cursor-pointer transition-colors ${
-                                location.pathname.startsWith('/orders')
+                                location.pathname.startsWith('/wishlist')
                                     ? 'text-violet-600 font-semibold'
                                     : 'text-slate-600 hover:text-slate-900'
                             }`}
                         >
-                            Orders
+                            Wishlist
                         </Link>
                     </nav>
 

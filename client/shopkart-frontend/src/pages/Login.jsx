@@ -12,9 +12,11 @@ const Login = () => {
 		password: ""
 	});
 	const [loader, setLoader] = useState(false);
+	const [error, setError] = useState(null);
 
 	const handleChange = (e) => {
 		setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+		setError('')
 	};
 
 	const handleSubmit = async (e) => {
@@ -23,13 +25,15 @@ const Login = () => {
 		try {
 			const res = await api.post('/customers/login', form);
 			setUser(res.data.customer); // Update the user state in AuthContext
-			setLoader(false);
-
-			navigate('/home'); // Redirect to home page after successful login
-			console.log('User logged in !');
+			setError(''); // Clear any previous errors
+			navigate('/home', { replace: true }); // Redirect to home page after successful login
+			// console.log('User logged in !');
 		} catch (error) {
+			setError(error.response?.data?.message || 'Unable to login. Please try again.');
+			// console.log(error.message);
+		}
+		finally {
 			setLoader(false);
-			console.log(error.message);
 		}
 	};
 
@@ -65,6 +69,26 @@ const Login = () => {
 						Log in
 					</div>
 				</div>
+
+				{/* Error Alert Message */}
+				{error && (
+					<div className="mb-4 p-3 rounded-xl bg-rose-50/90 border border-rose-200/80 text-rose-700 flex items-start gap-2.5 text-xs shadow-xs animate-in fade-in duration-200">
+						<svg className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+							<path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+						</svg>
+						<p className="flex-1 font-medium leading-relaxed">{error}</p>
+						<button
+							type="button"
+							onClick={() => setError('')}
+							className="text-rose-400 hover:text-rose-600 transition-colors p-0.5 rounded cursor-pointer"
+							title="Dismiss"
+						>
+							<svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+								<path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+							</svg>
+						</button>
+					</div>
+				)}
 
 				{/* Form */}
 				<form className="space-y-3" onSubmit={handleSubmit} autoComplete="off">

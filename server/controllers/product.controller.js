@@ -35,6 +35,7 @@ export const createProduct = async (req, res) => {
     }
 }
 
+
 export const getAllProducts = async (req, res) => {
     try {
 
@@ -81,3 +82,5 @@ export const getProductById = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 }
+
+
