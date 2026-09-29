@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 
@@ -7,8 +7,13 @@ const ProductCard = ({ product, wasWishlisted }) => {
     const isOutOfStock = stock <= 0;
 
     const navigate = useNavigate();
-    const [isWishlisted, setIsWishlisted] = useState(wasWishlisted);
+    const [isWishlisted, setIsWishlisted] = useState(Boolean(wasWishlisted));
     const [isAdding, setIsAdding] = useState(false);
+
+    // Keep internal wishlist state synchronized when parent prop changes
+    useEffect(() => {
+        setIsWishlisted(Boolean(wasWishlisted));
+    }, [wasWishlisted]);
 
     const handleToggleWishlist = async (e) => {
         e.preventDefault();
@@ -32,6 +37,7 @@ const ProductCard = ({ product, wasWishlisted }) => {
                 navigate('/login');
             } else {
                 console.error('Wishlist action failed:', err);
+                alert(err.response?.data?.message || 'Failed to update wishlist. Please try again.');
             }
         } finally {
             setIsAdding(false);
@@ -77,8 +83,8 @@ const ProductCard = ({ product, wasWishlisted }) => {
                     type="button"
                     onClick={handleToggleWishlist}
                     disabled={isAdding}
-                    title={isAdding ? "Saving..." : isWishlisted ? "Added to Wishlist" : "Add to Wishlist"}
-                    aria-label={isAdding ? "Saving..." : isWishlisted ? "Added to Wishlist" : "Add to Wishlist"}
+                    title={isAdding ? "Updating..." : isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+                    aria-label={isAdding ? "Updating..." : isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
                     className={`absolute top-2.5 right-2.5 w-8 h-8 rounded-full backdrop-blur-sm border shadow-sm flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90 z-10 ${isWishlisted
                             ? 'bg-rose-50 border-rose-200 text-rose-500 hover:bg-rose-100'
                             : 'bg-white/90 border-slate-200/80 text-slate-400 hover:text-rose-500 hover:bg-white hover:border-rose-200 hover:scale-110'

@@ -21,6 +21,16 @@ const ProductDetails = () => {
 
                 const data = await api.get(`/products/${id}`);
                 setProduct(data.data.product);
+
+                // Check if current product is already in user's wishlist
+                try {
+                    const wishListData = await api.get('/wishlist');
+                    const inWishlist = (wishListData.data.wishlist || []).some(item => item._id === id);
+                    setIsWishlisted(inWishlist);
+                } catch {
+                    // Not logged in or failed to fetch wishlist
+                    setIsWishlisted(false);
+                }
             } catch (err) {
                 console.error('Error fetching product:', err);
                 setError(err.response?.data?.message || 'Product not found or failed to load.');
@@ -34,22 +44,29 @@ const ProductDetails = () => {
 
     const _id = product?._id || id;
 
-    const handleAddToWishlist = async (e) => {
+    const handleToggleWishlist = async (e) => {
         e.preventDefault();
         if (isAdding) return;
+
         try {
             setIsAdding(true);
-            await api.post(`/wishlist/${_id}`);
-            setIsWishlisted(true);
-        } catch (err) {
-            if (err.response?.status === 409) {// code 409 indicates the product is already in the wishlist
+
+            if (isWishlisted) {
+                // Currently Wishlisted -> Send DELETE to Remove
+                await api.delete(`/wishlist/${_id}`);
+                setIsWishlisted(false);
+            } else {
+                // Not Wishlisted -> Send POST to Add
+                await api.post(`/wishlist/${_id}`);
                 setIsWishlisted(true);
-            } else if (err.response?.status === 401) {// code 401 indicates the user is not authenticated
-                alert('Please log in to add products to your wishlist.');
+            }
+        } catch (err) {
+            if (err.response?.status === 401) {
+                alert('Please log in to manage your wishlist.');
                 navigate('/login');
             } else {
-                console.error('Failed to add to wishlist:', err);
-                alert(err.response?.data?.message || 'Unable to save product. Please try again.');
+                console.error('Wishlist action failed:', err);
+                alert(err.response?.data?.message || 'Unable to update wishlist. Please try again.');
             }
         } finally {
             setIsAdding(false);
@@ -126,10 +143,10 @@ const ProductDetails = () => {
                                 {/* Top-Left Floating Wishlist Heart Button */}
                                 <button
                                     type="button"
-                                    onClick={handleAddToWishlist}
+                                    onClick={handleToggleWishlist}
                                     disabled={isAdding}
-                                    title={isWishlisted ? "In Wishlist" : "Add to Wishlist"}
-                                    aria-label={isWishlisted ? "In Wishlist" : "Add to Wishlist"}
+                                    title={isAdding ? "Updating..." : isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+                                    aria-label={isAdding ? "Updating..." : isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
                                     className={`absolute top-4 left-4 w-10 h-10 rounded-full backdrop-blur-sm border shadow-sm flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90 z-10 ${
                                         isWishlisted
                                             ? 'bg-rose-50 border-rose-200 text-rose-500 hover:bg-rose-100'
@@ -219,8 +236,10 @@ const ProductDetails = () => {
                                     {/* Wishlist Button */}
                                     <button
                                         type="button"
-                                        onClick={handleAddToWishlist}
+                                        onClick={handleToggleWishlist}
                                         disabled={isAdding}
+                                        title={isAdding ? "Updating..." : isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+                                        aria-label={isAdding ? "Updating..." : isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
                                         className={`sm:w-auto px-5 py-3.5 rounded-xl border text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer active:scale-95 shadow-xs ${
                                             isWishlisted
                                                 ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100'
@@ -247,7 +266,7 @@ const ProductDetails = () => {
                                                 />
                                             </svg>
                                         )}
-                                        <span>{isAdding ? 'Saving...' : isWishlisted ? 'Added to Wishlist' : 'Add to Wishlist'}</span>
+                                        <span>{isAdding ? 'Updating...' : isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}</span>
                                     </button>
                                 </div>
 

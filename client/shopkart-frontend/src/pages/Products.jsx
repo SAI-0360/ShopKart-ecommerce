@@ -29,11 +29,16 @@ const Products = () => {
             }
 
             const productsData = await api.get('/products', { params });
-            const wishListData = await api.get('/wishlist'); // Fetch wishlist data
-
             setProducts(productsData.data.products);
-            setWishListIds(wishListData.data.wishlist.map(item => item._id)); // Store wishlist product IDs
 
+            // Fetch wishlist data safely without blocking catalog display
+            try {
+                const wishListData = await api.get('/wishlist');
+                setWishListIds(wishListData.data.wishlist.map(item => item._id));
+            } catch (wishlistErr) {
+                // If user is not logged in or wishlist fails, default to empty list
+                setWishListIds([]);
+            }
         }
         catch (error) {
             console.error('Error fetching products:', error);
