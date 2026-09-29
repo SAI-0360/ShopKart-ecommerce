@@ -35,7 +35,7 @@ export const addToWishlist = async (req, res) => {
             User.findByIdAndUpdate(
                 customerId,
                 { $addToSet: { wishlist: productId } },
-                { new: true }
+                { returnDocument: 'after' }
             )
         );
 
@@ -72,7 +72,7 @@ export const removeFromWishlist = async (req, res) => {
             User.findByIdAndUpdate(
                 customerId,
                 { $pull: { wishlist: productId } },
-                { new: true }
+                { returnDocument: 'after' }
             )
         );
 
