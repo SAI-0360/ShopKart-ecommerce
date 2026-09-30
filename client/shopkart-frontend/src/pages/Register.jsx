@@ -42,8 +42,8 @@ const Register = () => {
     return (
         <div className="min-h-screen bg-zinc-100 flex flex-col items-center justify-center p-4 selection:bg-amber-400 selection:text-zinc-900 font-sans">
             {/* Brand Logo Header */}
-            <div className="mb-4 flex items-center gap-2">
-                <div className="w-7 h-7 rounded-md bg-amber-400 text-zinc-900 flex items-center justify-center font-bold shadow-xs">
+            <Link to="/" className="mb-4 flex items-center gap-2 group select-none cursor-pointer">
+                <div className="w-7 h-7 rounded-md bg-amber-400 text-zinc-900 flex items-center justify-center font-bold shadow-xs transition-transform duration-200 group-hover:scale-105">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                     </svg>
@@ -51,7 +51,7 @@ const Register = () => {
                 <span className="text-xl font-bold tracking-tight text-zinc-900">
                     Shop<span className="text-amber-500">Kart</span>
                 </span>
-            </div>
+            </Link>
 
             {/* Main Card - Amazon Create Account Box */}
             <div className="w-full max-w-[350px] bg-white rounded-lg border border-zinc-300 shadow-xs p-5 sm:p-6">

@@ -23,11 +23,11 @@ export const WishlistCard = ({ product, onRemove }) => {
         }`}>
 
             {/* Product Image & Badges */}
-            <div className="h-48 bg-white flex items-center justify-center p-3 relative border-b border-zinc-100">
+            <div className="h-52 w-full overflow-hidden bg-zinc-100 relative border-b border-zinc-100">
                 <img
                     src={image}
                     alt={name}
-                    className={`max-h-full max-w-full object-contain object-center transition-transform duration-300 ${
+                    className={`w-full h-full object-cover object-center transition-transform duration-300 ${
                         outOfStock 
                             ? 'grayscale opacity-60' 
                             : 'group-hover:scale-105'
