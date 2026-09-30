@@ -43,87 +43,95 @@ const Navbar = () => {
 
 
     return (
-        <header className="sticky top-0 z-50 bg-white border-b border-slate-200/80 shadow-sm">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6">
-                <div className="flex items-center justify-between h-16 gap-4">
+        <header className="sticky top-0 z-50 bg-zinc-900 border-b border-zinc-800 text-white shadow-sm outline-none">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                <div className="flex items-center justify-between h-14 gap-4">
 
-                    {/* Logo */}
-                    <Link to="/home" className="flex items-center gap-2.5 cursor-pointer group">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-200">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="currentColor">
+                    {/* Logo - Amazon Two-Tone Style (Compact) */}
+                    <Link to="/home" className="flex items-center gap-2 cursor-pointer group select-none outline-none focus:outline-none">
+                        <div className="w-8 h-8 rounded-lg bg-amber-400 text-zinc-900 flex items-center justify-center font-bold shadow-xs transition-transform duration-200 group-hover:scale-105">
+                            <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                             </svg>
                         </div>
-                        <span className="text-xl font-bold tracking-tight text-slate-900">
-                            Shop<span className="text-violet-600">Kart</span>
+                        <span className="text-lg font-bold tracking-tight text-white">
+                            Shop<span className="text-amber-400">Kart</span>
                         </span>
                     </Link>
 
                     {/* Simple Nav Links */}
-                    <nav className="hidden sm:flex items-center gap-6 text-sm font-medium">
+                    <nav className="hidden sm:flex items-center gap-1 text-[13px] font-semibold">
                         <Link
                             to="/home"
-                            className={`cursor-pointer transition-colors ${location.pathname === '/home'
-                                    ? 'text-violet-600 font-semibold'
-                                    : 'text-slate-600 hover:text-slate-900'
+                            className={`cursor-pointer transition-colors px-3 py-1.5 rounded-md ${location.pathname === '/home'
+                                    ? 'text-amber-400 bg-zinc-800 font-bold'
+                                    : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80'
                                 }`}
                         >
                             Home
                         </Link>
                         <Link
                             to="/products"
-                            className={`cursor-pointer transition-colors ${location.pathname.startsWith('/products')
-                                    ? 'text-violet-600 font-semibold'
-                                    : 'text-slate-600 hover:text-slate-900'
+                            className={`cursor-pointer transition-colors px-3 py-1.5 rounded-md ${location.pathname.startsWith('/products')
+                                    ? 'text-amber-400 bg-zinc-800 font-bold'
+                                    : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80'
                                 }`}
                         >
                             Products
                         </Link>
                         <Link
                             to="/wishlist"
-                            className={`cursor-pointer transition-colors inline-flex items-center gap-1.5 ${location.pathname.startsWith('/wishlist')
-                                    ? 'text-violet-600 font-semibold'
-                                    : 'text-slate-600 hover:text-slate-900'
+                            className={`cursor-pointer transition-colors inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md ${location.pathname.startsWith('/wishlist')
+                                    ? 'text-amber-400 bg-zinc-800 font-bold'
+                                    : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80'
                                 }`}
                         >
-                            <span>Wishlist {user ? `(${wishlistCount})` : ''}</span>
-                        </Link>
-                    </nav>
-
-                    {/* Right Side: User Info & Logout Button */}
-                    <div className="flex items-center gap-3">
-                        {/* Mobile Wishlist Link with Badge */}
-                        <Link
-                            to="/wishlist"
-                            className="sm:hidden relative p-2 text-slate-600 hover:text-rose-600 rounded-xl hover:bg-rose-50 transition-colors"
-                            title={user ? `Wishlist (${wishlistCount})` : "Wishlist"}
-                            aria-label="Wishlist"
-                        >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-                            </svg>
-                            {wishlistCount > 0 ? (
-                                <span className="absolute top-0.5 right-0.5 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                            <span>Wishlist</span>
+                            {user && wishlistCount > 0 ? (
+                                <span className="bg-amber-400 text-zinc-900 text-[11px] font-extrabold px-1.5 py-0.2 rounded-full shadow-xs">
                                     {wishlistCount}
                                 </span>
                             ) : null}
                         </Link>
-                        {/* User Badge */}
-                        <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/80">
-                            <div className="w-7 h-7 rounded-full bg-violet-100 text-violet-700 font-bold text-xs flex items-center justify-center">
+                    </nav>
+
+                    {/* Right Side: User Info & Logout Button */}
+                    <div className="flex items-center gap-2.5">
+                        {/* Mobile Wishlist Link with Badge */}
+                        <Link
+                            to="/wishlist"
+                            className="sm:hidden relative p-1.5 text-zinc-300 hover:text-amber-400 rounded-lg hover:bg-zinc-800 transition-colors"
+                            title={user ? `Wishlist (${wishlistCount})` : "Wishlist"}
+                            aria-label="Wishlist"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                            </svg>
+                            {wishlistCount > 0 ? (
+                                <span className="absolute top-0 right-0 min-w-3.5 h-3.5 px-1 rounded-full bg-amber-400 text-zinc-900 text-[9px] font-extrabold flex items-center justify-center">
+                                    {wishlistCount}
+                                </span>
+                            ) : null}
+                        </Link>
+                        {/* User Badge - Amazon "Hello, User" Style */}
+                        <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-zinc-800/90 border border-zinc-700/60">
+                            <div className="w-5.5 h-5.5 rounded-full bg-amber-400 text-zinc-900 font-extrabold text-[11px] flex items-center justify-center">
                                 {user?.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}
                             </div>
-                            <span className="text-xs font-semibold text-slate-700 hidden sm:inline">
-                                {user?.fullName || "User"}
-                            </span>
+                            <div className="flex flex-col text-left hidden sm:flex">
+                                <span className="text-[9px] text-zinc-400 leading-none">Hello,</span>
+                                <span className="text-[11px] font-bold text-white leading-tight truncate max-w-[110px]">
+                                    {user?.fullName || "User"}
+                                </span>
+                            </div>
                         </div>
 
                         {/* Logout Button */}
                         <button
                             onClick={handleLogout}
-                            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-rose-200 bg-rose-50/70 hover:bg-rose-100/80 text-rose-600 text-xs font-semibold cursor-pointer transition-all active:scale-95 shadow-sm"
+                            className="flex items-center gap-1 px-2.5 py-1 rounded-md border border-zinc-700 hover:border-amber-400 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold cursor-pointer transition-all active:scale-95"
                         >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="currentColor">
+                            <svg className="w-3.5 h-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
                             </svg>
                             <span>Logout</span>
