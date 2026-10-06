@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 const Navbar = () => {
     const { user, setUser } = useAuth();
+    const { totalItems } = useCart();
     const navigate = useNavigate();
     const location = useLocation();
     const [wishlistCount, setWishlistCount] = useState(0);
@@ -93,10 +95,40 @@ const Navbar = () => {
                                 </span>
                             ) : null}
                         </Link>
+                        <Link
+                            to="/cart"
+                            className={`cursor-pointer transition-colors inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md ${location.pathname.startsWith('/cart')
+                                    ? 'text-amber-400 bg-zinc-800 font-bold'
+                                    : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80'
+                                }`}
+                        >
+                            <span>Cart</span>
+                            {user && totalItems > 0 ? (
+                                <span className="bg-amber-400 text-zinc-900 text-[11px] font-extrabold px-1.5 py-0.2 rounded-full shadow-xs">
+                                    {totalItems}
+                                </span>
+                            ) : null}
+                        </Link>
                     </nav>
 
                     {/* Right Side: User Info & Logout Button */}
                     <div className="flex items-center gap-2.5">
+                        {/* Mobile Cart Link with Badge */}
+                        <Link
+                            to="/cart"
+                            className="sm:hidden relative p-1.5 text-zinc-300 hover:text-amber-400 rounded-lg hover:bg-zinc-800 transition-colors"
+                            title={user ? `Cart (${totalItems})` : "Cart"}
+                            aria-label="Cart"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                            </svg>
+                            {user && totalItems > 0 ? (
+                                <span className="absolute top-0 right-0 min-w-3.5 h-3.5 px-1 rounded-full bg-amber-400 text-zinc-900 text-[9px] font-extrabold flex items-center justify-center">
+                                    {totalItems}
+                                </span>
+                            ) : null}
+                        </Link>
                         {/* Mobile Wishlist Link with Badge */}
                         <Link
                             to="/wishlist"

@@ -1,19 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { useCart } from '../context/CartContext';
 
 const ProductCard = ({ product, wasWishlisted }) => {
     const { _id, name, description, price, category, image, stock } = product;
     const isOutOfStock = stock <= 0;
 
     const navigate = useNavigate();
+    const { cart, addToCart } = useCart();
     const [isWishlisted, setIsWishlisted] = useState(Boolean(wasWishlisted));
     const [isAdding, setIsAdding] = useState(false);
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+    const isInCart = cart?.some(item => (item.product?._id || item.product) === _id);
 
     // Keep internal wishlist state synchronized when parent prop changes
     useEffect(() => {
         setIsWishlisted(Boolean(wasWishlisted));
     }, [wasWishlisted]);
+
+    const handleAddToCart = async (e) => {
+        e.preventDefault();
+        if (isOutOfStock || isAddingToCart) return;
+
+        try {
+            setIsAddingToCart(true);
+            const res = await addToCart(_id, 1);
+            if (!res.success) {
+                if (res.message?.toLowerCase().includes('log in') || res.message?.toLowerCase().includes('token')) {
+                    alert('Please log in to add items to your cart.');
+                    navigate('/login');
+                } else {
+                    alert(res.message);
+                }
+            }
+        } catch {
+            alert('Failed to add to cart. Please try again.');
+        } finally {
+            setIsAddingToCart(false);
+        }
+    };
 
     const handleToggleWishlist = async (e) => {
         e.preventDefault();
@@ -136,8 +163,8 @@ const ProductCard = ({ product, wasWishlisted }) => {
                     </p>
                 </div>
 
-                {/* Bottom Row: Price & View Details CTA */}
-                <div className="pt-2.5 mt-2.5 border-t border-zinc-100 flex items-center justify-between">
+                {/* Bottom Row: Price & Actions CTA */}
+                <div className="pt-2.5 mt-2.5 border-t border-zinc-100 flex items-center justify-between gap-1.5">
                     <div>
                         <span className="text-[9px] text-zinc-400 block leading-tight">Price</span>
                         <div className="flex items-baseline">
@@ -148,15 +175,27 @@ const ProductCard = ({ product, wasWishlisted }) => {
                         </div>
                     </div>
 
-                    <Link
-                        to={`/products/${_id}`}
-                        className={`px-3 py-1.5 rounded-md text-[11px] font-bold tracking-wide transition-all shadow-xs active:scale-95 flex items-center gap-1 ${isOutOfStock
-                            ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600 border border-zinc-300'
-                            : 'bg-amber-400 hover:bg-amber-500 text-zinc-950 border border-amber-500'
+                    <div className="flex items-center gap-1.5">
+                        <Link
+                            to={`/products/${_id}`}
+                            className="px-2.5 py-1.5 rounded-md text-[11px] font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 transition-colors cursor-pointer"
+                        >
+                            Details
+                        </Link>
+
+                        <button
+                            type="button"
+                            onClick={handleAddToCart}
+                            disabled={isOutOfStock || isAddingToCart}
+                            className={`px-3 py-1.5 rounded-md text-[11px] font-bold tracking-wide transition-all shadow-xs active:scale-95 flex items-center gap-1 ${
+                                isOutOfStock
+                                    ? 'bg-zinc-100 text-zinc-400 border border-zinc-200 cursor-not-allowed'
+                                    : 'bg-amber-400 hover:bg-amber-500 text-zinc-950 border border-amber-500 cursor-pointer'
                             }`}
-                    >
-                        <span>See Details</span>
-                    </Link>
+                        >
+                            {isAddingToCart ? 'Adding...' : isInCart ? 'Add Another' : 'Add to Cart'}
+                        </button>
+                    </div>
                 </div>
             </div>
 

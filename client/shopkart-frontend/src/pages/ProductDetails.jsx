@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { api } from '../services/api';
+import { useCart } from '../context/CartContext';
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -12,6 +13,9 @@ const ProductDetails = () => {
     const [error, setError] = useState(null);
     const [isWishlisted, setIsWishlisted] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
+    const { cart, addToCart } = useCart();
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
+    const isInCart = cart?.some(item => (item.product?._id || item.product) === id);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -73,6 +77,28 @@ const ProductDetails = () => {
             }
         } finally {
             setIsAdding(false);
+        }
+    };
+
+    const handleAddToCart = async (e) => {
+        e.preventDefault();
+        if (!product || product.stock <= 0 || isAddingToCart) return;
+
+        try {
+            setIsAddingToCart(true);
+            const res = await addToCart(id, 1);
+            if (!res.success) {
+                if (res.message?.toLowerCase().includes('log in') || res.message?.toLowerCase().includes('token')) {
+                    alert('Please log in to add items to your cart.');
+                    navigate('/login');
+                } else {
+                    alert(res.message);
+                }
+            }
+        } catch {
+            alert('Failed to add to cart. Please try again.');
+        } finally {
+            setIsAddingToCart(false);
         }
     };
 
@@ -226,13 +252,14 @@ const ProductDetails = () => {
                                         {/* Add to Cart Button (Amazon Yellow Button) */}
                                         <button
                                             type="button"
-                                            disabled={product.stock <= 0}
+                                            onClick={handleAddToCart}
+                                            disabled={product.stock <= 0 || isAddingToCart}
                                             className="flex-1 py-2.5 px-5 rounded-md bg-amber-400 hover:bg-amber-500 text-zinc-950 font-bold text-xs sm:text-sm border border-amber-500 shadow-xs hover:shadow transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95"
                                         >
                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                                             </svg>
-                                            <span>Add to Cart</span>
+                                            <span>{isAddingToCart ? 'Adding to Cart...' : isInCart ? 'Add Another to Cart' : 'Add to Cart'}</span>
                                         </button>
 
                                         {/* Wishlist Button */}

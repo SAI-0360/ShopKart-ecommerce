@@ -102,7 +102,8 @@ export const updateQuantity = async (req, res) => {
             return res.status(400).json({ message: `Invalid product ID` });
         }
 
-        if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 1) {
+        const qty = Number(quantity);
+        if (!Number.isInteger(qty) || qty < 1) {
             return res.status(400).json({ message: `Quantity must be an integer of at least 1` });
         }
 
@@ -111,7 +112,7 @@ export const updateQuantity = async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        if (quantity > product.stock) {
+        if (qty > product.stock) {
             return res.status(400).json({ message: `Cannot exceed available stock (${product.stock})` });
         }
 
@@ -120,12 +121,12 @@ export const updateQuantity = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const cartItem = user.cart.find(item => item.product.toString() === productId);
+        const cartItem = user.cart.find(item => item.product?.toString() === productId);
         if (!cartItem) {
             return res.status(404).json({ message: 'Product not in cart' });
         }
 
-        cartItem.quantity = quantity;
+        cartItem.quantity = qty;
         await user.save();
 
         await user.populate({
@@ -133,10 +134,12 @@ export const updateQuantity = async (req, res) => {
             select: 'name price image stock'
         });
 
+        const cleanCart = user.cart.filter(item => item.product !== null);
+
         return res.status(200).json({
             success: true,
             message: 'Quantity updated',
-            cart: user.cart
+            cart: cleanCart
         });
     } catch (error) {
         return res.status(500).json({ message: 'Server error', error: error.message });
