@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import userRoutes from './routes/customer.route.js';
 import productRoutes from './routes/product.route.js';
 import wishlistRoutes from './routes/wishlist.route.js';
+import cartRoutes from './routes/cart.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
@@ -34,6 +35,7 @@ app.use(cookieParser());
 app.use('/customers', userRoutes);
 app.use('/products', productRoutes);
 app.use('/wishlist', wishlistRoutes);
+app.use('/cart', cartRoutes);
 
 app.get('/', (req, res) => {
     res.send('Welcome to ShopKart!')
