@@ -142,3 +142,47 @@ export const updateQuantity = async (req, res) => {
         return res.status(500).json({ message: 'Server error', error: error.message });
     }
 }
+
+
+export const removeFromCart = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const userId = req.user._id
+
+        if (!mongoose.Types.ObjectId.isValid(productId)) {
+            return res.status(400).json({ message: 'Invalid product ID' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const itemExists = user.cart.some(
+            item => item.product.toString() === productId
+        );
+        if (!itemExists) {
+            return res.status(404).json({ message: 'Product not found in cart' });
+        }
+        
+        user.cart = user.cart.filter(
+            item => item.product.toString() !== productId
+        );
+        await user.save();
+        
+        await user.populate({
+            path: 'cart.product',
+            select: 'name price image stock'
+        });
+        
+        return res.status(200).json({
+            success: true,
+            message: 'Product removed from cart',
+            cart: user.cart
+        });
+        
+    }
+    catch (error) {
+        return res.status(500).json({ message: 'Server error', error: error.message });
+    }
+}
