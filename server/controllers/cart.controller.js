@@ -67,6 +67,28 @@ export const addToCart = async (req, res) => {
     }
 };
 
-export const removeFromCart = async (req, res) => {
+export const getCart = async (req, res) => {
+    try {
+        const userId = req.user._id;
 
+        const user = await User.findById(userId).populate({
+            path: 'cart.product',
+            select: 'name price image stock'
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const cleanCart = user.cart.filter(item => item.product !== null);
+
+        return res.status(200).json({
+            success: true,
+            cart: cleanCart
+        });
+    }
+    catch (error) {
+        return res.status(500).json({ message: 'Server error', error: error.message });
+    }
 }
+
