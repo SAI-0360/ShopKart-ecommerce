@@ -128,3 +128,38 @@ export const verifyPayment = async (req, res) => {
         res.status(500).json({ message: "Internal server error" })
     }
 }
+
+export const getMyOrders = async (req, res) => {
+    try {
+        const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+        return res.status(200).json({
+            success: true,
+            orders
+        });
+    } catch (error) {
+        console.error("Get my orders error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const getOrderById = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        // IDOR Guard: Verify ownership
+        if (order.user.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "Unauthorized access to this order" });
+        }
+
+        return res.status(200).json({
+            success: true,
+            order
+        });
+    } catch (error) {
+        console.error("Get order by id error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
