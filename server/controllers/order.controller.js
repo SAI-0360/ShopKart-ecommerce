@@ -1,8 +1,11 @@
-import Order from "../models/order.model";
-import User from "../models/customer.model";
-import Product from "../models/product.model";
+import dotenv from "dotenv";
+import Order from "../models/order.model.js";
+import User from "../models/customer.model.js";
+import Product from "../models/product.model.js";
 import Razorpay from "razorpay";
+import crypto from "crypto";
 
+dotenv.config();
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET
@@ -10,7 +13,7 @@ const razorpay = new Razorpay({
 
 export const createPaymentOrder = async (req, res) => {
     try {
-        const { fullName, phone, addressLine1, city, state, pincode } = req.body.shippingAddress;
+        const { fullName, phone, addressLine1, city, state, pincode } = req.body.shippingAddress || {};
 
         if (!fullName || !phone || !addressLine1 || !city || !state || !pincode) {
             return res.status(400).json({ message: "All shipping address fields are required" })
@@ -20,7 +23,8 @@ export const createPaymentOrder = async (req, res) => {
             return res.status(400).json({ message: "Cart is empty" })
         }
 
-        const cart = req.user.cart;
+        const customer = await User.findById(req.user._id).populate("cart.product");
+        const cart = customer?.cart || [];
 
         for (const item of cart) {
             if (!item.product) {
@@ -104,7 +108,7 @@ export const verifyPayment = async (req, res) => {
 
         // Clear the user's cart after successful payment
         await User.findByIdAndUpdate(req.user._id, { $set: { cart: [] } });
-        
+
         // Decrease stock of products after successful payment  
         for (const item of order.items) {
             await Product.findByIdAndUpdate(item.product, {
@@ -119,7 +123,7 @@ export const verifyPayment = async (req, res) => {
         });
 
     }
-    catch {
+    catch (error) {
         console.error("Payment verification error:", error);
         res.status(500).json({ message: "Internal server error" })
     }
