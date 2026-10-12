@@ -71,3 +71,56 @@ export const createPaymentOrder = async (req, res) => {
     }
 }
 
+export const verifyPayment = async (req, res) => {
+    try {
+        const { orderId, razorpayPaymentId, razorpayOrderId, razorpaySignature } = req.body;
+
+        if (!orderId || !razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
+            return res.status(400).json({ message: "All fields are required" })
+        }
+
+        const body = razorpayOrderId + "|" + razorpayPaymentId;
+
+        const expectedSignature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(body)
+            .digest("hex");
+
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+        // Compare signatures
+        if (expectedSignature !== razorpaySignature) {
+            order.paymentStatus = "FAILED";
+            await order.save();
+            return res.status(400).json({ message: "Payment verification failed" });
+        }
+
+        order.paymentStatus = "PAID";
+        order.status = "PLACED";
+        order.razorpayPaymentId = razorpayPaymentId;
+        await order.save();
+
+        // Clear the user's cart after successful payment
+        await User.findByIdAndUpdate(req.user._id, { $set: { cart: [] } });
+        
+        // Decrease stock of products after successful payment  
+        for (const item of order.items) {
+            await Product.findByIdAndUpdate(item.product, {
+                $inc: { stock: -item.quantity }
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Payment verified and order placed successfully",
+            order
+        });
+
+    }
+    catch {
+        console.error("Payment verification error:", error);
+        res.status(500).json({ message: "Internal server error" })
+    }
+}
