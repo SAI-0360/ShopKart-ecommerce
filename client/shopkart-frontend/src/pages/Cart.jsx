@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useCart } from '../context/CartContext';
 
 const Cart = () => {
+    const navigate = useNavigate();
     const {
         cart,
         loading,
@@ -299,7 +300,7 @@ const Cart = () => {
                                 {/* Proceed to Checkout Button */}
                                 <button
                                     type="button"
-                                    onClick={() => alert('Proceeding to Checkout! (Lab 06 feature)')}
+                                    onClick={() => navigate('/checkout')}
                                     className="w-full py-2.5 px-4 rounded-md bg-amber-400 hover:bg-amber-500 text-zinc-950 font-bold text-xs sm:text-sm border border-amber-500 shadow-xs hover:shadow transition-all text-center cursor-pointer active:scale-95 mt-1"
                                 >
                                     Proceed to Checkout
