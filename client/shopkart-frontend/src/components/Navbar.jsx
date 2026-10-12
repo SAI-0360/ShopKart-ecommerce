@@ -66,8 +66,8 @@ const Navbar = () => {
                         <Link
                             to="/home"
                             className={`cursor-pointer transition-colors px-3 py-1.5 rounded-md ${location.pathname === '/home'
-                                    ? 'text-amber-400 bg-zinc-800 font-bold'
-                                    : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80'
+                                ? 'text-amber-400 bg-zinc-800 font-bold'
+                                : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80'
                                 }`}
                         >
                             Home
@@ -75,8 +75,8 @@ const Navbar = () => {
                         <Link
                             to="/products"
                             className={`cursor-pointer transition-colors px-3 py-1.5 rounded-md ${location.pathname.startsWith('/products')
-                                    ? 'text-amber-400 bg-zinc-800 font-bold'
-                                    : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80'
+                                ? 'text-amber-400 bg-zinc-800 font-bold'
+                                : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80'
                                 }`}
                         >
                             Products
@@ -84,8 +84,8 @@ const Navbar = () => {
                         <Link
                             to="/wishlist"
                             className={`cursor-pointer transition-colors inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md ${location.pathname.startsWith('/wishlist')
-                                    ? 'text-amber-400 bg-zinc-800 font-bold'
-                                    : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80'
+                                ? 'text-amber-400 bg-zinc-800 font-bold'
+                                : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80'
                                 }`}
                         >
                             <span>Wishlist</span>
@@ -98,8 +98,8 @@ const Navbar = () => {
                         <Link
                             to="/cart"
                             className={`cursor-pointer transition-colors inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md ${location.pathname.startsWith('/cart')
-                                    ? 'text-amber-400 bg-zinc-800 font-bold'
-                                    : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80'
+                                ? 'text-amber-400 bg-zinc-800 font-bold'
+                                : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80'
                                 }`}
                         >
                             <span>Cart</span>
@@ -108,6 +108,15 @@ const Navbar = () => {
                                     {totalItems}
                                 </span>
                             ) : null}
+                        </Link>
+                        <Link
+                            to="/orders"
+                            className={`cursor-pointer transition-colors px-3 py-1.5 rounded-md ${location.pathname.startsWith('/orders')
+                                    ? 'text-amber-400 bg-zinc-800 font-bold'
+                                    : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80'
+                                }`}
+                        >
+                            Orders
                         </Link>
                     </nav>
 
