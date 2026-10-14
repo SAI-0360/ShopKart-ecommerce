@@ -3,9 +3,15 @@ import User from '../models/customer.model.js';
 import bcrypt from 'bcrypt';
 import { genToken } from '../utils/generateTokens.js';
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const cookieOptions = {
-    httpOnly: true
-}
+    httpOnly: true,
+    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction,
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000
+};
 
 const sanitizeUser = (user) => {
     const safeUser = user.toObject ? user.toObject() : { ...user };
@@ -112,13 +118,17 @@ export const getMe = (req, res) => {
 export const logoutUser = (req, res) => {
     const token = req.cookies.token;
     if (token) {
-        res.clearCookie("token");
+        res.clearCookie("token", {
+            httpOnly: true,
+            sameSite: isProduction ? "none" : "lax",
+            secure: isProduction,
+            path: "/"
+        });
         return res.status(200).json({
             success: true,
             message: "Logged out successfully"
         });
     }
-
     return res.status(401).json({
         success: false,
         message: "You are not logged in"
