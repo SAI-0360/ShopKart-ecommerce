@@ -28,6 +28,12 @@ export const registerUser = async (req, res) => {
             return res.status(400).json({ message: 'Fill all the required fields!' });
         }
 
+        const cleanPhone = String(phone).replace(/[\s\-\(\)\.]/g, '');
+        const phoneMatch = cleanPhone.match(/^(?:\+91|0)?(\d{10})$/);
+        if (!phoneMatch) {
+            return res.status(400).json({ message: 'Please enter a valid 10-digit mobile number' });
+        }
+
         if (password.length <= 6) {
             return res.status(400).json({ message: 'Password is too short' })
         }
@@ -52,7 +58,7 @@ export const registerUser = async (req, res) => {
             fullName,
             email,
             password: hashedPassword,
-            phone,
+            phone: phoneMatch[1],
         })
 
         // Generating Token

@@ -19,6 +19,12 @@ export const createPaymentOrder = async (req, res) => {
             return res.status(400).json({ message: "All shipping address fields are required" })
         }
 
+        const cleanPhone = String(phone).replace(/[\s\-\(\)\.]/g, '');
+        const phoneMatch = cleanPhone.match(/^(?:\+91|0)?(\d{10})$/);
+        if (!phoneMatch) {
+            return res.status(400).json({ message: "Phone must be a valid 10-digit mobile number" });
+        }
+
         if (!req.user.cart || req.user.cart.length === 0) {
             return res.status(400).json({ message: "Cart is empty" })
         }
@@ -54,7 +60,10 @@ export const createPaymentOrder = async (req, res) => {
         const order = await Order.create({
             user: req.user._id,
             items: orderItems,
-            shippingAddress: req.body.shippingAddress,
+            shippingAddress: {
+                ...req.body.shippingAddress,
+                phone: phoneMatch[1]
+            },
             totalAmount,
             paymentStatus: "PENDING",
             status: "PENDING_PAYMENT",

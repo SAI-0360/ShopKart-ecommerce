@@ -35,9 +35,11 @@ const Checkout = () => {
         if (!formData.city.trim()) newErrors.city = "City is required";
         if (!formData.state.trim()) newErrors.state = "State is required";
 
-        // Phone: Must be exactly 10 digits
-        if (!/^\d{10}$/.test(formData.phone.trim())) {
-            newErrors.phone = "Phone must be a valid 10-digit number";
+        // Phone: Must be a valid 10-digit mobile number (allows +91, 0, spaces, and dashes)
+        const cleanPhone = formData.phone.replace(/[\s\-\(\)\.]/g, '');
+        const phoneMatch = cleanPhone.match(/^(?:\+91|0)?(\d{10})$/);
+        if (!phoneMatch) {
+            newErrors.phone = "Phone must be a valid 10-digit mobile number";
         }
 
         // Pincode: Must be exactly 6 digits
@@ -70,9 +72,17 @@ const Checkout = () => {
         try {
             setProcessing(true);
 
+            const cleanPhone = formData.phone.replace(/[\s\-\(\)\.]/g, '');
+            const phoneMatch = cleanPhone.match(/^(?:\+91|0)?(\d{10})$/);
+            const normalizedPhone = phoneMatch ? phoneMatch[1] : formData.phone.trim();
+            const shippingPayload = {
+                ...formData,
+                phone: normalizedPhone
+            };
+
             // 4. Ask our backend to create both the ShopKart Order and the Razorpay Order
             const { data } = await api.post('/orders/create-payment-order', {
-                shippingAddress: formData
+                shippingAddress: shippingPayload
             });
 
             const { orderId, razorpayOrderId, amount, currency, keyId } = data;
@@ -89,7 +99,7 @@ const Checkout = () => {
                 // PRE-FILL USER DETAILS in popup
                 prefill: {
                     name: formData.fullName,
-                    contact: formData.phone,
+                    contact: normalizedPhone,
                     email: user?.email || ""
                 },
                 theme: {

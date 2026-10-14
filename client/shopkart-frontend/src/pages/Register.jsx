@@ -25,14 +25,25 @@ const Register = () => {
         e.preventDefault()
         setLoader(true)
         setError('')
+
+        const cleanPhone = form.phone.replace(/[\s\-\(\)\.]/g, '');
+        const phoneMatch = cleanPhone.match(/^(?:\+91|0)?(\d{10})$/);
+
+        if (!phoneMatch) {
+            setError("Please enter a valid 10-digit mobile number");
+            setLoader(false);
+            return;
+        }
+
         try {
-            const res = await api.post('/customers/register', form)
+            const res = await api.post('/customers/register', {
+                ...form,
+                phone: phoneMatch[1]
+            })
             setUser(res.data.customer) // Update the user state in AuthContext
             navigate('/home', { replace: true }) // Redirect to home page after successful registration
-            // console.log('User registered !')
         } catch (error) {
             setError(error.response?.data?.message || 'Unable to register. Please try again.')
-            // console.log(error.message)
         }
         finally {
             setLoader(false)
@@ -157,7 +168,7 @@ const Register = () => {
                             id="phone"
                             name='phone'
                             type="tel"
-                            placeholder="Mobile number"
+                            placeholder="10-digit mobile number (e.g. 9876543210)"
                             className="w-full px-2.5 py-1.5 rounded-md border border-zinc-400 bg-white text-zinc-900 placeholder-zinc-400 text-xs sm:text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
                             value={form.phone}
                             onChange={handleChange}
