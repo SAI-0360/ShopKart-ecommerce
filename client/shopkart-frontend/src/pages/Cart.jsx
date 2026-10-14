@@ -20,7 +20,12 @@ const Cart = () => {
     const [updatingId, setUpdatingId] = useState(null);
 
     const handleUpdateQuantity = async (productId, newQuantity) => {
-        if (updatingId || newQuantity < 1) return;
+        if (updatingId) return;
+
+        if (newQuantity <= 0) {
+            handleRemoveItem(productId);
+            return;
+        }
 
         try {
             setUpdatingId(productId);
@@ -217,8 +222,8 @@ const Cart = () => {
                                                         <button
                                                             type="button"
                                                             onClick={() => handleUpdateQuantity(productId, item.quantity - 1)}
-                                                            disabled={isAtMinQuantity || isItemUpdating}
-                                                            title={isAtMinQuantity ? "Minimum quantity is 1" : "Decrease quantity"}
+                                                            disabled={isItemUpdating}
+                                                            title={item.quantity === 1 ? "Remove item from cart" : "Decrease quantity"}
                                                             className="w-7 h-7 flex items-center justify-center text-zinc-700 hover:bg-zinc-200 rounded-l-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-bold text-sm"
                                                         >
                                                             −
